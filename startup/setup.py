@@ -65,7 +65,7 @@ installedVersion = False
   2018          .  2018  .  201800  .  2.7.11 2     5.6.1  .  2018     . 2017-06-26
   2019          .  2019  .  201900  .  2.7.11 2     5.6.1  .  2019     . 2019-01-15
   2020          .  2020  .  202000  .  2.7.11 2     5.12.5 .  2020     . 2019-12-10
-
+  2022          .  2022  .  202200  .  3.7.7  2     5.15.2 .  2022     . 2021-03-29
 
 ------------------------------------------------------------------------------------------
 '''
@@ -319,72 +319,84 @@ def osBuild():
     elif build == 'win32':
         return 32
 
-def framerate_mapping(value=None, asAPI=False):
+def framerate_mapping(value=None, asAPI=False, truncate_float=False):
     '''
     single place to convert fps data between string representation, actual float(fps) and MTime.unit
     if no valuye is passed we return a full mapping dict {pal: (25, OpenMaya.MTime.kPALFrame), ...}
 
     :param value: if float or int we convert the data to timeUnit ('pal','ntsc',....)
-        if value is a string we convert to actual fps
-    :param asAPI: if True we return the OpneMaya.MTime.kUnit for the value
+        if value is a string we convert to actual fps as float
+    :param asAPI: if value was given and this is True we return the OpneMaya.MTime.kUnit for the value
+    :param truncate_float: round(fps, 3) round the float to 3 decimal places.
     '''
     import maya.OpenMaya as OpenMaya
-    fpsDict = {"game": (15.0, OpenMaya.MTime.kGames),
-               "film": (24.0, OpenMaya.MTime.kFilm),                    # 6
-               "pal": (25.0, OpenMaya.MTime.kPALFrame),                 # 7
-               "ntsc": (30.0, OpenMaya.MTime.kNTSCFrame),               # 8
-               "show": (48.0, OpenMaya.MTime.kShowScan),                # 9
-               "palf": (50.0, OpenMaya.MTime.kPALField),                # 10
-               "ntscf": (60.0, OpenMaya.MTime.kNTSCField)}              # 11
+    fpsDict = {}
 
-    if mayaVersion() >= 2017:
-        new_2017fps = {"2fps": (2.0, OpenMaya.MTime.k2FPS),             # 12
-                        "3fps": (3.0, OpenMaya.MTime.k3FPS),            # 13
-                        "4fps": (4.0, OpenMaya.MTime.k4FPS),            # 14
-                        "5fps": (5.0, OpenMaya.MTime.k5FPS),            # 15
-                        "6fps": (6.0, OpenMaya.MTime.k6FPS),            # 16
-                        "8fps": (8.0, OpenMaya.MTime.k8FPS),            # 17
-                        "10fps": (10.0, OpenMaya.MTime.k10FPS),         # 18
-                        "12fps": (12.0, OpenMaya.MTime.k12FPS),         # 19
-                        "16fps": (16.0, OpenMaya.MTime.k16FPS),         # 20
-                        "20fps": (20.0, OpenMaya.MTime.k20FPS),         # 21
-                        "29.97fps": (29.97, OpenMaya.MTime.k29_97FPS),  # 44
-                        "40fps": (40.0, OpenMaya.MTime.k40FPS),         # 22
-                        "75fps": (75.0, OpenMaya.MTime.k75FPS),         # 23
-                        "80fps": (80.0, OpenMaya.MTime.k80FPS),         # 24
-                        "100fps": (100.0, OpenMaya.MTime.k100FPS),      # 25
-                        "120fps": (120.0, OpenMaya.MTime.k120FPS),      # 26
-                        "125fps": (125.0, OpenMaya.MTime.k125FPS),      # 27
-                        "150fps": (150.0, OpenMaya.MTime.k150FPS),      # 28
-                        "200fps": (200.0, OpenMaya.MTime.k200FPS),      # 29
-                        "240fps": (240.0, OpenMaya.MTime.k240FPS),      # 30
-                        "250fps": (250.0, OpenMaya.MTime.k250FPS),      # 31
-                        "300fps": (300.0, OpenMaya.MTime.k300FPS),      # 32
-                        "375fps": (375.0, OpenMaya.MTime.k375FPS),      # 33
-                        "400fps": (400.0, OpenMaya.MTime.k400FPS),      # 34
-                        "500fps": (500.0, OpenMaya.MTime.k500FPS),      # 35
-                        "600fps": (600.0, OpenMaya.MTime.k600FPS),      # 36
-                        "750fps": (750.0, OpenMaya.MTime.k750FPS),      # 37
-                        "1200fps": (1200.0, OpenMaya.MTime.k1200FPS),   # 38
-                        "1500fps": (1500.0, OpenMaya.MTime.k1500FPS),   # 39
-                        "2000fps": (2000.0, OpenMaya.MTime.k2000FPS),   # 40
-                        "3000fps": (3000.0, OpenMaya.MTime.k3000FPS),   # 41
-                        "6000fps": (6000.0, OpenMaya.MTime.k6000FPS)}   # 42
-        fpsDict.update(new_2017fps)
+    _bases = {"game": (15.0, 'kGames'),              # 5
+               "film": (24.0, 'kFilm'),              # 6
+               "pal": (25.0, 'kPALFrame'),           # 7
+               "ntsc": (30.0, 'kNTSCFrame'),         # 8
+               "show": (48.0, 'kShowScan'),          # 9
+               "palf": (50.0, 'kPALField'),          # 10
+               "ntscf": (60.0, 'kNTSCField'),        # 11
+               "2fps": (2.0, 'k2FPS'),               # 12
+               "3fps": (3.0, 'k3FPS'),               # 13
+               "4fps": (4.0, 'k4FPS'),               # 14
+               "5fps": (5.0, 'k5FPS'),               # 15
+               "6fps": (6.0, 'k6FPS'),               # 16
+               "8fps": (8.0, 'k8FPS'),               # 17
+               "10fps": (10.0, 'k10FPS'),            # 18
+               "12fps": (12.0, 'k12FPS'),            # 19 
+               "16fps": (16.0, 'k16FPS'),            # 20 
+               "20fps": (20.0, 'k20FPS'),            # 21 
+               "40fps": (40.0, 'k40FPS'),            # 22
+               "75fps": (75.0, 'k75FPS'),            # 23
+               "80fps": (80.0, 'k80FPS'),            # 24
+               "100fps": (100.0, 'k100FPS'),         # 25
+               "120fps": (120.0, 'k120FPS'),         # 26 
+               "125fps": (125.0, 'k125FPS'),         # 27 
+               "150fps": (150.0, 'k150FPS'),         # 28 
+               "200fps": (200.0, 'k200FPS'),         # 29 
+               "240fps": (240.0, 'k240FPS'),         # 30 
+               "250fps": (250.0, 'k250FPS'),         # 31
+               "300fps": (300.0, 'k300FPS'),         # 32
+               "375fps": (375.0, 'k375FPS'),         # 33
+               "400fps": (400.0, 'k400FPS'),         # 34
+               "500fps": (500.0, 'k500FPS'),         # 35 
+               "600fps": (600.0, 'k600FPS'),         # 36
+               "750fps": (750.0, 'k750FPS'),         # 37
+               "1200fps": (1200.0, 'k1200FPS'),      # 38
+               "1500fps": (1500.0, 'k1500FPS'),      # 39 
+               "2000fps": (2000.0, 'k2000FPS'),      # 40 
+               "3000fps": (3000.0, 'k3000FPS'),      # 41
+               "6000fps": (6000.0, 'k6000FPS'),      # 42
+               "23.976fps": (24.0 * 1000.0 / 1001.0, 'k23_976FPS'),  # 43
+               "29.97fps": (30.0 * 1000.0 / 1001.0, 'k29_97FPS'),    # 44
+               "29.97df": (30.0 * 1000.0 / 1001.0, 'k29_97DF'),      # 45
+               "47.952fps": (48.0 * 1000.0 / 1001.0, 'k47_952FPS'),  # 46
+               "59.94fps": (60.0 * 1000.0 / 1001.0, 'k59_94FPS'),    # 47
+               "44100fps": (44100.0, 'k44100FPS'),   # 48
+               "48000fps": (48000.0, 'k48000FPS')}   # 49
 
-    if mayaVersion() >= 2018:
-        new_2018fps = {"23.976fps": (23.976, OpenMaya.MTime.k23_976FPS),    # 43
-                        "29.97df": (29.97, OpenMaya.MTime.k29_97DF),        # 45
-                        "47.952fps": (47.952, OpenMaya.MTime.k47_952FPS),   # 46
-                        "59.94fps": (59.94, OpenMaya.MTime.k59_94FPS),      # 47
-                        "44100fps": (44100.0, OpenMaya.MTime.k44100FPS),    # 48
-                        "48000fps": (48000.0, OpenMaya.MTime.k48000FPS)}    # 49
-        fpsDict.update(new_2018fps)
+    # now in a try loop so that when the API bails due to MTime differences
+    # between Maya versions we're still ok
+    for fps, data in list(_bases.items()):
+        try:
+            api = getattr(OpenMaya.MTime, data[1])
+            if not truncate_float:
+                fpsDict[fps] = (data[0], api)
+            else:
+                fpsDict[fps] = (round(data[0], 3), api)
+        except:
+            log.debug("given fps doesn't exist in this build of Maya API")
+
     if not value:
         return fpsDict
+
+    # value comparison and conversion
     if type(value) in [int, float]:
         for k, v in list(fpsDict.items()):
-            if float(v[0]) == float(value):
+            if abs(float(v[0]) - float(value)) < 0.001:
                 if not asAPI:
                     return k
                 return v[1]
@@ -400,11 +412,12 @@ def getCurrentFPS(return_full_map=False):
     :param return_full_map: if True we return a dictionary of timeUnit:fps rather than the
         current actual fps - useful for debugging
     '''
-    if not return_full_map:
+    if not return_full_map:  
+        # do we just call the Maya `currentTimeUnitToFPS` ?
         data = framerate_mapping()
         return data[cmds.currentUnit(q=True, fullName=True, time=True)][0]
     else:
-        # why remap? this is purely for consistency
+        # why remap? this is purely for consistency on older calls
         data = {}
         for k, v in list(framerate_mapping().items()):
             data[k] = v[0]
@@ -665,7 +678,8 @@ def addToMayaMenus():
                           ann=LANGUAGE_MAP._MainMenus_.copy_to_clipboard_ann,
                           p=mainFileMenu,
                           echoCommand=True,
-                          c="import maya.cmds as cmds;import Red9.core.Red9_General as r9General;r9General.Clipboard.setText(cmds.file(q=True,sn=True))")
+                          c="import Red9.core.Red9_General as r9General;import pyperclip;pyperclip.copy(r9General.sceneName())")
+#                           c="import maya.cmds as cmds;import Red9.core.Red9_General as r9General;r9General.Clipboard.setText(cmds.file(q=True,sn=True))")
             cmds.menuItem('redNineOpenFolderItem',
                           l=LANGUAGE_MAP._MainMenus_.open_in_explorer,
                           ann=LANGUAGE_MAP._MainMenus_.open_in_explorer_ann,
@@ -673,6 +687,13 @@ def addToMayaMenus():
                           echoCommand=True,
                           c="import maya.cmds as cmds;import Red9.core.Red9_General as r9General;r9General.os_OpenFileDirectory(cmds.file(q=True,sn=True))")
             if has_pro_pack():
+                cmds.menuItem(divider=True, p=mainFileMenu)
+                cmds.menuItem('redNineSaver9AnimItem',
+                              l=LANGUAGE_MAP._MainMenus_.save_r9anim,
+                              ann=LANGUAGE_MAP._MainMenus_.save_r9anim_ann,
+                              p=mainFileMenu,
+                              echoCommand=True,
+                              c="from Red9.pro_pack import Pro_MenuStubs;Pro_MenuStubs('r9anim_save_complete')")
                 cmds.menuItem('redNineOpenr9AnimItem',
                               l=LANGUAGE_MAP._MainMenus_.open_r9anim,
                               ann=LANGUAGE_MAP._MainMenus_.open_r9anim_ann,
@@ -779,7 +800,6 @@ def addAudioMenu(parent=None, rootMenu='redNineTraxRoot', prefix=''):
         else:
             raise Exception('given parent for Red9 Sound Menu is invalid %s' % parent)
 
-
     cmds.menuItem(l=LANGUAGE_MAP._MainMenus_.sound_offset_manager, p=rootMenu,
                   ann=LANGUAGE_MAP._MainMenus_.sound_offset_manager_ann,
                   c="import Red9.core.Red9_Audio as r9Audio;r9Audio.AudioToolsWrap().show()")
@@ -840,13 +860,13 @@ def red9ButtonBGC(colour, qt=False, widget=None):
     '''
     Generic setting for the main button colours in the UI's
     '''
-
+    rgb = []
     if colour == 1 or colour == 'green':
         rgb = [0.6, 1, 0.6]
     elif colour == 2 or colour == 'grey':
         rgb = [0.5, 0.5, 0.5]
     elif colour == 3 or colour == 'red':
-        rgb = [1, 0.3, 0.3]
+        rgb = [1.0, 0.3, 0.3]
     elif colour == 4 or colour == 'white':
         rgb = [0.75, 0.75, 0.8]
     elif colour == 5 or colour == 'dark':
@@ -859,6 +879,8 @@ def red9ButtonBGC(colour, qt=False, widget=None):
         rgb = [0.25, 0.25, 0.25]
     elif colour == 9 or colour == 'darkred':
         rgb = [0.6, 0.1, 0.1]
+    else:
+        return None
     if qt:
         colour = [rgb[0] * 255, rgb[1] * 255, rgb[2] * 255]
         if widget:
@@ -985,6 +1007,11 @@ def red9_help(*args):
     helpFile = __formatPath_join(red9ModulePath(), 'docs', r'Red9-StudioTools Help.pdf')
     r9General.os_OpenFile(helpFile)
 
+def red9_pro_docs_path(*args):
+    ''' path to the red9 ProPack docs docs '''
+    import Red9.core.Red9_General as r9General  # lazy load
+    return  __formatPath_join(red9ModulePath(), 'docs', 'Red9 ProPack_release_notes')
+
 def red9_blog(*args):
     ''' open up the Red9 Blog '''
     import Red9.core.Red9_General as r9General  # lazy load
@@ -999,7 +1026,7 @@ def red9_website_home(*args):
 def red9_facebook(*args):
     ''' open up the Red9 Facebook Page '''
     import Red9.core.Red9_General as r9General  # lazy load
-    r9General.os_OpenFile('http://www.facebook.com/Red9StudioPack/')
+    r9General.os_OpenFile('http://www.facebook.com/Red9Anim/')  # Red9StudioPack/')
 
 def red9_twitter(*args):
     ''' Open up the Red9 Twitter feed '''
@@ -1250,8 +1277,6 @@ def has_pro_pack():
     Red9 Pro_Pack is available and activated as user
     '''
     if os.path.exists(pro_pack_path()):
-        # return True
-
         # Red 9 pro is not boot yet,
         # better not call if before boot is finish
         try:
@@ -1262,8 +1287,10 @@ def has_pro_pack():
             else:
                 return False
         except Exception as err:
+#             import traceback
             # we have the pro-pack folder so assume we're running legacy build
             log.info('r9Pro : checkr9User : failed validation! : %s' % err)
+#             print traceback.format_exc()
             return True
     else:
         return False
@@ -1382,12 +1409,30 @@ def red9ProPackInfo(*args):
 # CLIENT MODULES --- RED9 INTERNAL SUPPORT
 # -----------------------------------------------------------------------------------------
 
+'''
+New Maya.env added 07/06/21 "RED9_CLIENTCORE" which if set will allow
+you to divert the Red9_ClientCore folder to any location available.
 
+RED9_CLIENTCORE=R:/distributed/path/ClientCore
+
+this will expect the ClientCore folder to have each client as a separate sub-folder
+which will be imported by the boot process. The ClientCore folder on disc must also
+have a blank __init__.py file in it to make it a valid Python module setup
+'''
+    
 CLIENTS_BOOTED = []
 
 
 def client_core_path():
+    if os.getenv('RED9_CLIENTCORE'):
+        return __formatPath_join(os.getenv('RED9_CLIENTCORE'))
     return __formatPath_join(os.path.dirname(red9ModulePath()), 'Red9_ClientCore')
+
+def client_core_has_init(path=''):
+    if not path:
+        path = client_core_path()
+    if '__init__.py' in os.listdir(path):
+        return True
 
 def has_client_modules():
     '''
@@ -1401,7 +1446,7 @@ def get_client_modules():
     '''
     get all client modules ready for the boot sequence
 
-    #TODO: link this up with a management setup so we can determine
+    # TODO: link this up with a management setup so we can determine
     which client to boot if we have multiple client repositories in the system.
     '''
     clients = []
@@ -1419,7 +1464,59 @@ def clients_booted():
     global CLIENTS_BOOTED
     return CLIENTS_BOOTED
 
-def boot_client_projects(batchclients=None):  # []):
+
+class Client_Manager(object):
+    '''
+    simple Client select manager which we trigger as a layoutDialog so it' acts like a
+    confirmDialog and pauses till you hit one of the confirmation buttons / is closed
+    '''
+    def __init__(self, *args):
+        self.clients_selected = []
+        self.clients = get_client_modules()
+        self.returned = []
+
+    def show(self):
+        cmds.columnLayout(adjustableColumn=True)
+        cmds.separator(h=15, style='none')
+        cmds.text('    Please Select the Required Clients to boot    ', font='boldLabelFont')
+        cmds.separator(h=15, style='none')
+        cmds.separator(h=2, style='in')
+        for client in self.clients:
+            cmds.iconTextCheckBox('%s' % client, style='textOnly', label=client,
+            onc=partial(self.add_client, client),
+            ofc=partial(self.remove_client, client))
+            cmds.separator(h=2, style='in')
+        cmds.separator(h=15, style='none')
+#         cmds.rowColumnLayout(nc=3)
+        cmds.button(label='Boot SELECTED', c=partial(self.close_and_return, 'selected'))
+        cmds.separator(h=3, style='none')
+        cmds.button(label='Boot ALL', c=partial(self.close_and_return, 'all'))
+        cmds.separator(h=3, style='none')
+        cmds.button(label='Boot NONE', c=partial(self.close_and_return, 'none'))
+#         cmds.setParent('..')
+        cmds.separator(h=15, style='none')
+        cmds.iconTextButton(style='iconAndTextHorizontal', bgc=(0.7, 0, 0),
+                            align='left',
+                            image1='Rocket9_buttonStrap_narrow.png',
+                            c=lambda *args: (r9Setup.red9ContactInfo()), h=24, w=275)
+    
+    def add_client(self, client, *args):
+        self.clients_selected.append(client)
+
+    def remove_client(self, client, *args):
+        self.clients_selected.remove(client)
+
+    def close_and_return(self, mode, *args):
+        cmds.layoutDialog(dismiss=mode)
+        if mode=='selected':
+            self.returned = self.clients_selected
+        elif mode=='all':
+            self.returned = self.clients
+        else:
+            self.returned = []
+
+
+def boot_client_projects(batchclients=None, clientsToBoot=[]):
     '''
     Boot Client modules found in the Red9_ClientCore dir. This now prompts
     if multiple client projects were found.
@@ -1433,38 +1530,52 @@ def boot_client_projects(batchclients=None):  # []):
     global CLIENTS_BOOTED
     CLIENTS_BOOTED = []
     clients = get_client_modules()
-    clientsToBoot = []
+    _clientcore_path = client_core_path()
+    _import_as_name_only = False
+
+    # append clientcore_path to the Python path ONLY if it doesn't have an __init__.py file.
+    # with no __init.py__ we import just as client name. Really though the _clientcore_path
+    # folder should have an __init__.py to make sure imports are correct when
+    # clients start to overload structures, import changes to Red9_ClientCore.client
+    if not client_core_has_init(_clientcore_path) and not _clientcore_path in sys.path:
+        sys.path.append(_clientcore_path)
+        _import_as_name_only = True
 
     # mayaBatch boot (unittests and batching)
 #     print 'Maya is Batch : ', mayaIsBatch()
 #     print 'clients : ', batchclients
     if mayaIsBatch():
         if batchclients is None:
-#             print '################### batchclients = None'
             return
         if batchclients:
             clientsToBoot = [_client for _client in batchclients if _client in clients]
         else:
             clientsToBoot = clients
-        log.info('mayBatch custom clients to load: %s' % clientsToBoot)
+        log.info('mayaBatch custom clients to load: %s' % clientsToBoot)
 
     else:
         # standard boot sequence
         if clients and len(clients) > 1:
-            options = ['ALL', 'NONE']
-            options.extend(clients)
-            result = cmds.confirmDialog(title='ProjectPicker',
-                                message=("Multiple Clients Found!\r\r" +
-                                         "Which Client would you like to boot?"),
-                                button=options, messageAlign='center', icon='question',
-                                dismissString='Cancel')
-            if result == 'ALL':
-                clientsToBoot = clients
-            if result == 'NONE':
-                return
-            elif result not in ['Cancel', 'ALL', 'NONE']:
-#                 print 'Appending Client selection ', result
-                clientsToBoot.append(result)
+
+            cm=Client_Manager()
+            cmds.layoutDialog(ui=cm.show)
+            print(('clients booting : ', cm.returned))
+            clientsToBoot = cm.returned
+
+#             options = ['ALL', 'NONE']
+#             options.extend(clients)
+#             result = cmds.confirmDialog(title='ProjectPicker',
+#                                 message=("Multiple Clients Found!\r\r" +
+#                                          "Which Client would you like to boot?"),
+#                                 button=options, icon='question',
+#                                 dismissString='Cancel')
+#             if result == 'ALL':
+#                 clientsToBoot = clients
+#             if result == 'NONE':
+#                 return
+#             elif result not in ['Cancel', 'ALL', 'NONE']:
+# #                 print 'Appending Client selection ', result
+#                 clientsToBoot.append(result)
         else:
             clientsToBoot = clients
 
@@ -1472,14 +1583,20 @@ def boot_client_projects(batchclients=None):  # []):
     for client in clientsToBoot:
 
         # manage default project folders
-        if os.path.exists(__formatPath_join(client_core_path(), client, 'icons')):
-            addIconsPath(__formatPath_join(client_core_path(), client, 'icons'))
+        if os.path.exists(__formatPath_join(_clientcore_path, client, 'icons')):
+            addIconsPath(__formatPath_join(_clientcore_path, client, 'icons'))
         # added 25/02/20
-        if os.path.exists(__formatPath_join(client_core_path(), client, 'plug-ins', str(int(mayaVersion())))):
-            addPluginPath(__formatPath_join(client_core_path(), client, 'plug-ins', str(int(mayaVersion()))))
-        elif os.path.exists(__formatPath_join(client_core_path(), client, 'plug-ins')):
-            addPluginPath(__formatPath_join(client_core_path(), client, 'plug-ins'))
-        cmds.evalDeferred("import Red9_ClientCore.%s" % client, lp=True)  # Unresolved Import
+        if os.path.exists(__formatPath_join(_clientcore_path, client, 'plug-ins', str(int(mayaVersion())))):
+            addPluginPath(__formatPath_join(_clientcore_path, client, 'plug-ins', str(int(mayaVersion()))))
+        elif os.path.exists(__formatPath_join(_clientcore_path, client, 'plug-ins')):
+            addPluginPath(__formatPath_join(_clientcore_path, client, 'plug-ins'))
+
+        if not _import_as_name_only:
+            cmds.evalDeferred("import %s.%s" % (os.path.basename(_clientcore_path), client), lp=True)  # Unresolved Import
+            log.info('Client Boot : ClientCore python import called as : "import %s.%s"' % (os.path.basename(_clientcore_path), client))
+        else:
+            cmds.evalDeferred("import %s" % client, lp=True)  # Unresolved Import
+            log.info('Client Boot : ClientCore python import called as : "import %s"' % client)
 
         CLIENTS_BOOTED.append(client)
 
@@ -1493,10 +1610,7 @@ def boot_client_projects(batchclients=None):  # []):
                 pass
     try:
         # remove the blank placeholder project now that we have proper client projects incoming
-        cmds.evalDeferred('from Red9.pro_pack import PROJECT_DATA;PROJECT_DATA.remove_project()')
-        # Finally after booting all clients required sync the actual PROJECT_DATA object to
-        # the last loaded client. We don't need to sync Perforce mounts as the project_load will do that for us
-        # cmds.evalDeferred('from Red9.pro_pack import PROJECT_DATA;PROJECT_DATA.sync_project_to_settings(project=True, perforce=False)', lp=True)
+        cmds.evalDeferred("from Red9.pro_pack import PROJECT_DATA;PROJECT_DATA.remove_project(project='Empty')", lp=True)
     except:
         log.warning('PROJECT_DATA : Failed to sync last project handler')
 
@@ -1507,9 +1621,10 @@ def __reload_clients__():
     '''
     for client in get_client_modules():
         try:
-            path = 'Red9_ClientCore.%s' % client
-            cmds.evalDeferred("import %s;%s._reload()" % (path, path), lp=True)  # Unresolved Import
-            log.info('Reloaded Client : "%s"' % path)
+#             path = 'Red9_ClientCore.%s' % client
+#             cmds.evalDeferred("import %s;%s._reload()" % (path, path), lp=True)  # Unresolved Import
+            cmds.evalDeferred("import %s;%s._reload()" % (client, client), lp=True)  # Unresolved Import
+            log.info('Reloaded Client : "%s"' % client)
         except:
             log.info('Client : "%s" : does not have a _reload func internally' % path)
 
