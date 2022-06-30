@@ -276,8 +276,8 @@ class BindNodeBase(object):
         '''
         Main Wrapper to make the AnimBind setup between Source and Destination nodes
         '''
-        print('The current Driving Object (source) is : %s' % self.sourceNode.stripNamespace())
-        print('The current Slave Object (destination) is : %s' % self.destinationNode.stripNamespace())
+        print(('The current Driving Object (source) is : %s' % self.sourceNode.stripNamespace()))
+        print(('The current Slave Object (destination) is : %s' % self.destinationNode.stripNamespace()))
 
         self.make_bind_base(self.destinationNode.nodeName())  # Make the MatchObject and parent to the source
         self.align_bind_node()  # Align the new node to the Desitation Ctr
@@ -709,7 +709,7 @@ def bind_skeletons(source, dest, method='connect', scales=False, verbose=False, 
                     # turn off the compensation so that the rig can still be scaled correctly by the MasterNode
                     # cmds.setAttr('%s.segmentScaleCompensate' % dJnt, 0)
                 except:
-                    print('failed : scales ', dJnt)
+                    print(('failed : scales ', dJnt))
 
 
 def make_stabilized_node(nodeName=None, centered=True):
@@ -753,7 +753,7 @@ def add_bind_markers(ctrls=None, *args):
     if not ctrls:
         ctrls = cmds.ls(sl=True, l=True)
     for ctr in ctrls:
-        print(pm.PyNode(ctr))
+        print((pm.PyNode(ctr)))
         BindNodeBase.add_bind_markers(pm.PyNode(ctr))
 
 def removeBindMarker(ctrls=None, *args):

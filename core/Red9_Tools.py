@@ -1,11 +1,15 @@
 '''
 ..
-    Red9 Studio Pack: Maya Pipeline Solutions
+    Red9 Pro Pack: Maya Pipeline Solutions
+    ======================================
+     
     Author: Mark Jackson
-    email: rednineinfo@gmail.com
-
-    Red9 blog : http://red9-consultancy.blogspot.co.uk/
-    MarkJ blog: http://markj3d.blogspot.co.uk
+    email: info@red9consultancy.com
+     
+    Red9 : http://red9consultancy.com
+    Red9 Vimeo : https://vimeo.com/user9491246
+    Twitter : @red9_anim
+    Facebook : https://www.facebook.com/Red9Anim
 
 '''
 
@@ -66,15 +70,16 @@ class SceneReviewerUI(object):
         cmds.textFieldGrp('author', l=LANGUAGE_MAP._SceneReviewerUI_.author, ed=False, text='')
         cmds.textFieldGrp('date', l=LANGUAGE_MAP._SceneReviewerUI_.date, ed=False, text='')
         cmds.textFieldGrp('sceneName', l=LANGUAGE_MAP._SceneReviewerUI_.scene_name, ed=False, text='')
+#         cmds.checkBox('wordwrap', l='word wrap', v=False)
         cmds.separator(h=15, style='none')
         cmds.text(l=LANGUAGE_MAP._SceneReviewerUI_.comment)
-        cmds.scrollField('comment', text='', ed=True, h=200, wordWrap=False,
+        cmds.scrollField('comment', text='', ed=True, h=200, wordWrap=True,
                          kpc=partial(self.updateInternalDict),
                          cc=partial(self.updateInternalDict))
         cmds.button(l=LANGUAGE_MAP._SceneReviewerUI_.new_comment, bgc=r9Setup.red9ButtonBGC(1), c=partial(self.addNewComment))
         cmds.separator(h=15, style='none')
         cmds.text(l=LANGUAGE_MAP._SceneReviewerUI_.history)
-        cmds.scrollField('history', editable=False, en=True, wordWrap=False, h=200, text='')
+        cmds.scrollField('history', editable=False, en=True, wordWrap=True, h=200, text='')
         cmds.separator(h=15, style='none')
         cmds.rowColumnLayout('SceneNodeActivatorRC', numberOfColumns=3, columnWidth=[(1, 200), (2, 200)])
         cmds.button('setReviewActive', l=LANGUAGE_MAP._SceneReviewerUI_.activate_live_review,
@@ -168,6 +173,8 @@ class SceneReviewerUI(object):
     def _resizeTextScrollers(self):
         height = (cmds.scrollLayout('reviewScrollLayout', q=True, h=True) / r9Setup.maya_dpi_scaling_factor())
         width = (cmds.scrollLayout('reviewScrollLayout', q=True, w=True) / r9Setup.maya_dpi_scaling_factor()) - 18  # column attach space = 5 on both
+#         cmds.scrollField('comment', e=True, wordWrap=cmds.checkBox('wordwrap', q=True, v=True))
+#         cmds.scrollField('history', e=True, wordWrap=cmds.checkBox('wordwrap', q=True, v=True))
         cmds.scrollField('comment', e=True, h=(height / 2) - 120)
         cmds.scrollField('history', e=True, h=(height / 2) - 120)
         cmds.rowColumnLayout('SceneNodeActivatorRC', e=True, columnWidth=[(1, (width / 2) - 1), (2, (width / 2) - 1)])
