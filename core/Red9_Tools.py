@@ -13,6 +13,8 @@
 
 '''
 
+
+
 import maya.cmds as cmds
 
 from functools import partial
@@ -22,7 +24,6 @@ import os
 
 import Red9.startup.setup as r9Setup
 from . import Red9_Meta as r9Meta
-# import Red9_CoreUtils as r9Core
 from . import Red9_AnimationUtils as r9Anim
 
 import logging

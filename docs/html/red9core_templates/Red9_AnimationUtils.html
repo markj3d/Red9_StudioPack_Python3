@@ -73,6 +73,9 @@
 <li class="toctree-l1"><a class="reference internal" href="../red9pro_templates/tools/Red9_Pro_project_manager.html">Pro_Pack : tools : project_manager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../red9pro_templates/tools/Red9_Pro_rig_manager.html">Pro_Pack : tools : rig_manager</a></li>
 </ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../red9pro_templates/puppet/Red9_Pro_ikfk_match.html">Pro_Pack : puppet : ikfk_match</a></li>
+</ul>
 
         </div>
       </div>
@@ -959,7 +962,7 @@ if the source jnt has incoming scale connections which would then be propagated 
 
 <dl class="staticmethod">
 <dt id="Red9.core.Red9_AnimationUtils.AnimFunctions.inverseAnimChannels">
-<em class="property">static </em><code class="descname">inverseAnimChannels</code><span class="sig-paren">(</span><em>node</em>, <em>channels</em>, <em>time=None</em><span class="sig-paren">)</span><a class="headerlink" href="#Red9.core.Red9_AnimationUtils.AnimFunctions.inverseAnimChannels" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><code class="descname">inverseAnimChannels</code><span class="sig-paren">(</span><em>node</em>, <em>channels=[]</em>, <em>time=None</em><span class="sig-paren">)</span><a class="headerlink" href="#Red9.core.Red9_AnimationUtils.AnimFunctions.inverseAnimChannels" title="Permalink to this definition">¶</a></dt>
 <dd><p>really basic method used in the Mirror calls</p>
 </dd></dl>
 
@@ -1176,7 +1179,7 @@ pack, using a filterSettings node thats passed into the __init__</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>node</strong> – nodes to take the attrs</li>
-<li><strong>side</strong> – valid values are ‘Centre’,’Left’ or ‘Right’ or 0, 1, 2</li>
+<li><strong>side</strong> – valid values are ‘Centre’,’Left’, ‘Right’ or 0, 1, 2 or ‘C’, ‘L’, ‘R’</li>
 <li><strong>slot</strong> – bool Mainly used to pair up left and right paired controllers</li>
 <li><strong>axis</strong> – eg ‘translateX,rotateY,rotateZ’ simple comma separated string
 If this is set then it overrides the default mirror axis.
