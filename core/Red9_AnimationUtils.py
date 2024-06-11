@@ -72,16 +72,6 @@ Code examples:
 '''
 
 
-
-import maya.cmds as cmds
-import maya.mel as mel
-
-import Red9.startup.setup as r9Setup
-from . import Red9_CoreUtils as r9Core
-from . import Red9_General as r9General
-from . import Red9_PoseSaver as r9Pose
-from . import Red9_Meta as r9Meta
-
 from functools import partial
 import os
 import random
@@ -90,6 +80,22 @@ import re
 import shutil
 import math
 import traceback
+
+import maya.cmds as cmds
+import maya.mel as mel
+
+import Red9.startup.setup as r9Setup
+if sys.version_info.major > 2:
+    from . import Red9_CoreUtils as r9Core
+    from . import Red9_General as r9General
+    from . import Red9_PoseSaver as r9Pose
+    from . import Red9_Meta as r9Meta
+else:
+    import Red9_CoreUtils as r9Core
+    import Red9_General as r9General
+    import Red9_PoseSaver as r9Pose
+    import Red9_Meta as r9Meta
+
 
 import Red9.packages.configobj as configobj
 
@@ -5152,7 +5158,7 @@ class MirrorHierarchy(object):
         if self.unresolved:
             for key, val in list(self.unresolved.items()):
                 if val:
-                    print('\CLASHING %s Mirror Indexes =====================================================' % key)
+                    print('\nCLASHING %s Mirror Indexes =====================================================' % key)
                     for i in r9Core.sortNumerically(val):
                         print('clashing Index : %s : %s : %s' %
                               (key, i, ', '.join([r9Core.nodeNameStrip(n) for n in val[i]])))

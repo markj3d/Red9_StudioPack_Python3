@@ -34,13 +34,20 @@
 
 
 
+import sys
+
 import maya.cmds as cmds
 import pymel.core as pm
 
 import Red9.startup.setup as r9Setup
-from . import Red9_AnimationUtils as r9Anim
-from . import Red9_CoreUtils as r9Core
-from . import Red9_General as r9General
+if sys.version_info.major > 2:
+    from . import Red9_AnimationUtils as r9Anim
+    from . import Red9_CoreUtils as r9Core
+    from . import Red9_General as r9General
+else:
+    import Red9_AnimationUtils as r9Anim
+    import Red9_CoreUtils as r9Core
+    import Red9_General as r9General
 
 
 import logging

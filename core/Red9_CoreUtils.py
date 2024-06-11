@@ -26,14 +26,21 @@ import re
 import random
 import math
 import os
+import sys
 
 import Red9.packages.configobj as configobj
 import Red9.startup.setup as r9Setup
 
-from . import Red9_General as r9General
-from . import Red9_Audio as r9Audio
-from . import Red9_AnimationUtils as r9Anim
-from . import Red9_Meta as r9Meta
+if sys.version_info.major > 2:
+    from . import Red9_General as r9General
+    from . import Red9_Audio as r9Audio
+    from . import Red9_AnimationUtils as r9Anim
+    from . import Red9_Meta as r9Meta
+else:
+    import Red9_General as r9General
+    import Red9_Audio as r9Audio
+    import Red9_AnimationUtils as r9Anim
+    import Red9_Meta as r9Meta
 
 import logging
 logging.basicConfig()
@@ -1332,7 +1339,7 @@ class FilterNode(object):
             If the searchAttrs has an entry in the form **NOT:searchAttr** then this will be forcibly
             excluded from the filter. Also you can now do **myAttr=2.33** to only pass if the attr is equal
             similarly **NOT:myAttr=2.33** will exclude if the value is equal
-            see the "..\Red9\tests\Red9_CoreUtilTests.py" for live unittest examples
+            see the "..\\Red9\\tests\\Red9_CoreUtilTests.py" for live unittest examples
 
         .. note::
             current Implementation DOES NOT allow multiple attr tests as only 1 val per key
