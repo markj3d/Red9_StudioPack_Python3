@@ -24,22 +24,29 @@ posePointCloud and the snapping core
 '''
 
 
-
-import Red9.startup.setup as r9Setup
-from . import Red9_CoreUtils as r9Core
-from . import Red9_General as r9General
-from . import Red9_AnimationUtils as r9Anim
-from . import Red9_Meta as r9Meta
-
-import maya.OpenMaya as OpenMaya
-import maya.cmds as cmds
-
 import os
-import Red9.packages.configobj as configobj
+import sys
 import time
 import getpass
 import json
 import traceback
+
+import Red9.startup.setup as r9Setup
+if sys.version_info.major > 2:
+    from . import Red9_CoreUtils as r9Core
+    from . import Red9_General as r9General
+    from . import Red9_AnimationUtils as r9Anim
+    from . import Red9_Meta as r9Meta
+else:
+    import Red9_CoreUtils as r9Core
+    import Red9_General as r9General
+    import Red9_AnimationUtils as r9Anim
+    import Red9_Meta as r9Meta
+
+import maya.OpenMaya as OpenMaya
+import maya.cmds as cmds
+
+import Red9.packages.configobj as configobj
 
 
 import logging

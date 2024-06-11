@@ -21,10 +21,15 @@ from functools import partial
 import time
 import getpass
 import os
+import sys
 
 import Red9.startup.setup as r9Setup
-from . import Red9_Meta as r9Meta
-from . import Red9_AnimationUtils as r9Anim
+if sys.version_info.major > 2:
+    from . import Red9_Meta as r9Meta
+    from . import Red9_AnimationUtils as r9Anim
+else:
+    import Red9_Meta as r9Meta
+    import Red9_AnimationUtils as r9Anim
 
 import logging
 logging.basicConfig()

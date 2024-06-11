@@ -55,9 +55,14 @@ import pyperclip
 
 
 import Red9.startup.setup as r9Setup
-from . import Red9_General as r9General
-from . import Red9_CoreUtils as r9Core
-from . import Red9_AnimationUtils as r9Anim
+if sys.version_info.major > 2:
+    from . import Red9_General as r9General
+    from . import Red9_CoreUtils as r9Core
+    from . import Red9_AnimationUtils as r9Anim
+else:
+    import Red9_General as r9General
+    import Red9_CoreUtils as r9Core
+    import Red9_AnimationUtils as r9Anim
 
 import logging
 logging.basicConfig()

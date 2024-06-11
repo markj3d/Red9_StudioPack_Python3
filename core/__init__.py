@@ -14,33 +14,42 @@ Core is the library of Python modules that make the backbone of the Red9 Pack
 so that the global RED9_META_REGISTERY is built up correctly
 
 '''
-
-from . import Red9_General as r9General
-from . import Red9_Meta as r9Meta
-from . import Red9_Tools as r9Tools
-from . import Red9_CoreUtils as r9Core
-from . import Red9_AnimationUtils as r9Anim
-from . import Red9_PoseSaver as r9Pose
-from . import Red9_Audio as r9Audio
-import importlib
-
+import sys
+if sys.version_info.major > 2:
+    from importlib import reload
+    from . import Red9_General as r9General
+    from . import Red9_Meta as r9Meta
+    from . import Red9_Tools as r9Tools
+    from . import Red9_CoreUtils as r9Core
+    from . import Red9_AnimationUtils as r9Anim
+    from . import Red9_PoseSaver as r9Pose
+    from . import Red9_Audio as r9Audio
+else:
+    import Red9_General as r9General
+    import Red9_Meta as r9Meta
+    import Red9_Tools as r9Tools
+    import Red9_CoreUtils as r9Core
+    import Red9_AnimationUtils as r9Anim
+    import Red9_PoseSaver as r9Pose
+    import Red9_Audio as r9Audio
 
 
 def _reload():
     '''
     reload carefully and re-register the RED9_META_REGISTRY
     '''
-    importlib.reload(r9General)
-    importlib.reload(r9Meta)
-    importlib.reload(r9Tools)
-    importlib.reload(r9Audio)
-    importlib.reload(r9Core)
-    importlib.reload(r9Anim)
-    importlib.reload(r9Pose)
+    reload(r9General)
+    reload(r9Meta)
+    reload(r9Tools)
+    reload(r9Audio)
+    reload(r9Core)
+    reload(r9Anim)
+    reload(r9Pose)
 
     r9Meta.metaData_sceneCleanups()
     r9Meta.registerMClassInheritanceMapping()
     print('Red9 Core Reloaded and META REGISTRY updated')
+
 
 def _setlogginglevel_debug(module='all'):
     '''
@@ -53,7 +62,7 @@ def _setlogginglevel_debug(module='all'):
         r9Anim.log.setLevel(r9Anim.logging.DEBUG)
         print('Red9_AnimationUtils set to DEBUG state')
     if module == 'r9General' or  module == 'all':
-        Red9_General.log.setLevel(Red9_General.logging.DEBUG)
+        r9General.log.setLevel(r9General.logging.DEBUG)
         print('Red9_General set to DEBUG state')
     if module == 'r9Tools' or  module == 'all':
         r9Tools.log.setLevel(r9Tools.logging.DEBUG)
@@ -80,7 +89,7 @@ def _setlogginglevel_info(module='all'):
         r9Anim.log.setLevel(r9Anim.logging.INFO)
         print('Red9_AnimationUtils set to INFO state')
     if module == 'r9General' or  module == 'all':
-        Red9_General.log.setLevel(Red9_General.logging.INFO)
+        r9General.log.setLevel(r9General.logging.INFO)
         print('Red9_General set to INFO state')
     if module == 'r9Tools' or  module == 'all':
         r9Tools.log.setLevel(r9Tools.logging.INFO)

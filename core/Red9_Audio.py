@@ -22,14 +22,20 @@ import maya.cmds as cmds
 import maya.mel as mel
 from functools import partial
 import os
+import sys
 # import struct
 # import math
 # import re
 
 import Red9.startup.setup as r9Setup
-from . import Red9_General as r9General
-from . import Red9_Meta as r9Meta
-from . import Red9_CoreUtils as r9Core
+if sys.version_info.major > 2:
+    from . import Red9_General as r9General
+    from . import Red9_Meta as r9Meta
+    from . import Red9_CoreUtils as r9Core
+else:
+    import Red9_General as r9General
+    import Red9_Meta as r9Meta
+    import Red9_CoreUtils as r9Core
 
 import wave
 import contextlib
