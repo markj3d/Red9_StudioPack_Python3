@@ -29,6 +29,18 @@
         "url": "https://youtu.be/Ugv4rvqXFlU",
         "info": "This follows on from the previous ProPack demo where we took you through the new Butterworth animation filter. In this case it's a request from a number of clients who are dealing with budget moCap setups and needing solutions to help clean-up up some of the low frequency noise inherent in the data .... a perfect case for the Butterworth algorithm."
     },
+    "anim_layer_merge": {
+    	"title": "Animation Layer Merge",
+        "date": 20240415, 
+        "tags": [
+            "animation", 
+            "propack",
+            "layer", 
+            "merge"
+        ], 
+        "url": "https://youtu.be/FFDWdl6xXss",
+        "info": "This is a simple exposure of our frame sampling code to enable you to merge animation layers down in Maya much, much faster than native Maya merge layers. In this example we're flattening the scene and removing all layers in 7 seconds, using Maya's native merge it takes 38 seconds on the same scene!"
+    },
     "anim_redirect_preview": {
     	"title": "Animation Re-Director",
         "date": 20150426, 
@@ -65,6 +77,20 @@
         "url": "https://youtu.be/9GlUbSGwLYM",
         "info": "This is a demo showing the massive updates to the Red9 Animation Re-Direct systems in ProPack for clients. The new build allows you to automatically straighten animation data, controlling how a character moves through a scene or un-winding animation that's maybe been shot in a MotionStage with limited volume."
     }, 
+	"anim_binder_masterclass": {
+    	"title": "Live Animation Binding - Autodesk MasterClass",
+        "date": 20111025, 
+        "tags": [
+            "protobnd", 
+            "propack", 
+			"masterclass",
+            "animation", 
+            "retargetting",
+			"remapping"
+        ], 
+        "url": "https://youtu.be/sEgF89Wlzok",
+        "info": "This MasterClass will outline a method of transferring character animations between any source data and a given animation rig using a binder template file. This method was originally designed to enable Motion Capture data to be mapped to our in-house rigging systems while allowing for easy manipulation, but quickly evolved into a retargeting system in its own right."
+    },
     "anim_remapping": {
     	"title": "Animation Remapping",
         "chapters": [
@@ -167,7 +193,88 @@
         ], 
         "url": "https://youtu.be/leu31DZi00Y",
         "info": "Copy & Paste Transforms is something that Maya doesn't do natively, or at least not in a simple manner. Here we go through the new functionality that allows you to not only copy transforms, but also do so in world space AND between Maya sessions.\n\nWe also go through the Red9 HUD, designed to allow you to debug and monitor attributes live in the viewport and expose sliders to control those attrs if needed."
-    },     
+    },  
+    "deformation_stack": {
+    	"title": "Deformation Stack Transfer",
+        "chapters": [
+        	"0:00 Introduction",
+			"0:42 Initial overview",
+			"2:30 transfer skin and blend data between non consistent meshes",
+			"5:40 blendshape transfer logic explained",
+			"6:50 simple facial mesh tranferred to combined mesh",
+			"8:18 layered deformation stack, multiple skinClusters VFX",
+			"11:40 using helper geo to transfer deformations for eyelashes"
+        ], 
+        "date": 20240830, 
+        "tags": [
+            "propack", 
+            "animation", 
+            "rigging", 
+            "transfer",
+            "copy",
+            "skinning",
+            "blendshape",
+            "deform"
+        ], 
+        "url": "https://youtu.be/8UpYrhjC1RM",
+        "info": "This new tool allows you to transfer deformation, both skinning and blendshape data, between meshes base either on vertex indecies OR in coordinate space. The tool is the result of 2 years of production work for recent TV and film projects and has been a keystone of our internal pipelines. \n\nIt's aimed at both game and VFX projects, supporting both layered skinCluster / blendShape deformation stacking, or game based single deformation chains. Ideal for building up complex facial systems or just pushing deformation between mesh updates where vertex IDs haven't been maintained"
+    },  
+    "deformation_stack_component": {
+    	"title": "Deformation Stack Transfer - Component",
+        "date": 20241120, 
+        "tags": [
+            "propack", 
+            "animation", 
+            "rigging", 
+            "transfer",
+            "copy",
+            "skinning",
+            "blendshape",
+            "deform",
+			"component"
+        ], 
+        "url": "https://youtu.be/W2A8cMLopf0",
+        "info": "Deformation Transfer Tool continues to get substantial development as a key part of our internal production services. This new update is a bit of a game changer, releasing TD's and modellers from hours of painful work when transferring blendshape and skinning info between different meshes. We introduce component level blendshape & skin transfer for maintaining fidelity, even when the mesh causes issue with overlapping geo."
+    },
+	"deformation_stack_batch_mode": {
+    	"title": "Deformation Stack Transfer - Batch Mode & Updates",
+        "date": 20250501, 
+        "tags": [
+            "propack", 
+            "animation", 
+            "rigging", 
+            "transfer",
+            "copy",
+            "skinning",
+            "blendshape",
+            "deform",
+			"layered",
+			"component"
+        ], 
+        "url": "https://youtu.be/UPzsZfxAdrY",
+        "info": "This has quickly become one of the most powerful tools in ProPack. In the first of this two-part series, we dive into our Deformation Transfer tool within a proper production pipeline context. You'll see how the new Batch Mode lets you transfer full deformation stacks between multiple meshes at once — perfect for handling complex characters efficiently. We also cover updates for managing deformers, and show how to transfer facial base data to secondary elements like beards, eyelashes, and brows."
+    },
+	"deformation_stack_layered_deformer": {
+    	"title": "Deformation Stack Transfer - Layered Deformations",
+        "date": 20250501, 
+        "tags": [
+            "propack", 
+            "animation", 
+            "rigging", 
+            "transfer",
+            "copy",
+            "skinning",
+            "blendshape",
+            "deform",
+			"layered",
+			"component"
+        ], 
+        "url": "https://youtu.be/hRKtD5GbBcM",
+        "info": "In this second video, we explore how the Deformation Transfer tool enables layered deformations in Maya — a technique that proved essential during the rigging of Sonic 3. Layered deformation gives you the freedom to break down complex rigging tasks into manageable parts, much like working with Photoshop layers. You can isolate, refine, and then stack deformations into a single mesh — all while maintaining high performance and clean evaluation. A powerful approach for building scalable, production-ready rigs."
+    }, 
+	
+	
+	
     "exporter_01_concepts_ui": {
     	"title": "Exporter Systems 01: Concepts and UIs",
         "chapters": [
@@ -309,6 +416,23 @@
         "url": "https://youtu.be/NinwGp4mAq8",
         "info": "MetaData Attribute Handlers: This is one of the demo videos I talked over during the Develop talk back in 2014, the audio is quiet as it was only really a guide track, but worth putting up so that you can follow the PowerPoint that I'll also upload."
     }, 
+    "motion_trails": {
+    	"title": "Motion Trails",
+        "date": 20240415, 
+        "tags": [
+            "propack", 
+            "animation",
+            "trail",
+            "vfx"
+        ], 
+		"chapters": [
+            "0:12 Introduction", 
+            "2:08 Create initial Trail setup", 
+            "7:45 Attaching Trail to live Rig example" 
+        ], 
+        "url": "https://youtu.be/8a9yfFaSD4o",
+        "info": "Motion Trails is a VFX based tool designed to create live 'trail' effects in Maya. Ideal for things like speed trail effects on characters or vehicles, on swords to see the arcs in motion, or just to allow the animators to see a proper visual representation of their controllers."
+    }, 
     "mrig_working_with_part_1": {
     	"title": "Working with Red9 - Part 1 : The Red9 Puppet Rig",
         "date": 20200817, 
@@ -354,7 +478,7 @@
         "chapters": [
             "0:36 IKFK Spine Re-Fitting algorithm", 
             "5:05 IKFK Matching UI", 
-            "15:52 Parent Space Switching"
+            "15:54 Parent Space Switching"
         ], 
         "date": 20180622, 
         "tags": [
@@ -382,6 +506,20 @@
         ], 
         "url": "https://youtu.be/HSa8otoF2AI",
         "info": "IKFK Casting is a new concept in the way we deal with IKFK switching within the Red9 PuppetRig and it's toolset. Previously switching between IK or FK would match one system to the other BUT, it wouldn't deal with matching during a soft IKFK blend. It also meant that you couldn't just push an entire animation to a given state if that anim already had numerous IKFK switching happening.\n\nThis is where the concept of IKFK Casting comes in. With casting we cache the end solve of the limb, regardless of it's IKFK state, then switch the relevant system to match that cached data. Simple concept yet very powerful!"
+    }, 
+    "mrig_ikfk_setup": {
+    	"title": "IKFK Matching Setup",
+        "date": 20240415, 
+        "tags": [
+            "animation", 
+            "rig",
+            "ikfk",
+            "setup",
+			"ikfk matching",
+			"metarig"
+        ], 
+        "url": "https://youtu.be/vA8kjqJgx7U",
+        "info": "This has been a long time in the making but finally we expose our IKFK matching systems within ProPack to all users. This means that any rig can be easily hooked up to our IKFK matchpnt systems. It's easy to setup, granular, and takes advantage of all of the Red9 PuppetRig backend in order to run the solve."
     }, 
     "mrig_preview_camera": {
     	"title": "MRig Preview Camera",
@@ -746,6 +884,22 @@
         "url": "https://youtu.be/QDSMb_UAIN8",
         "info": "Treadmill is a simple tool that makes it fast and easy to convert a characters overall motion, such as a run, into an run on the spot. This is done by pushing the animation of the character from it's various child controls, over to the top controller in the rig and recalculating the rest of the data accordingly. The process is 2 way, you can easily go back and forth at the click of a button."
     },
+    "treadmill_root_manip": {
+    	"title": "Main Ctrl Manipulation",
+        "date": 20240416, 
+        "tags": [
+            "treadmill", 
+            "animation", 
+            "world space",
+            "spot",
+            "main",
+            "mocap",
+			"root",
+			"offset"
+        ], 
+        "url": "https://youtu.be/Bx_EV0MAWuc",
+        "info": "This is an update to our Treadmill tool to allow you to use it to manipulate your rigs root controller in any world space, a feature suggested by one of our clients. This is something we see animators having to do all of the time so we thought we'd automate it for you."
+    },
     "skinning_01": {
     	"title": "Skin Tools",
         "date": 20171102, 
@@ -757,6 +911,19 @@
         ], 
         "url": "https://youtu.be/UO6MaHK4URs",
         "info": "The SkinTools are part of the Red9 ProPack and are designed to make it easier to save, load and manage skin weight information inside Maya, ensuring that the skinCluster information is maintains exactly as it was stored!"
+    },
+    "softmod": {
+    	"title": "SoftMods",
+        "date": 20240415, 
+        "tags": [
+            "softmod", 
+            "deformation", 
+            "animation",
+			"vfx",
+            "rigging"
+        ], 
+        "url": "https://youtu.be/xSLYWznksiY",
+        "info": "SoftMod is a wrapper over the Maya SoftMod deformation node, designed to easily expose it to both riggers and animators alike. Native Maya softmod uses a custom manipulator and is difficult to use in a rigging situation without getting into matrix math. This tool exposes it as a simple rig which you can then treat like any other rigging part. Initially exposed to allow us to control corneal bulge in a complex film VFX situation"
     },
     "ui_regression_tests": {
     	"title": "UI's in 30 seconds",

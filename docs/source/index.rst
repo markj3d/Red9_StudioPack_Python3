@@ -79,6 +79,7 @@ We also support a number of Maya.env variables that can be modified to control t
 | **RED9_PERFORCE_FORCE_ABORT=1**  : 0 or 1 hard abort for any Perforce binding & handling
 | **RED9_LICENSE_LOCATION=path**  : custom path to find the R9USER license file
 | **RED9_AIR_GAPPED=1**  : 0 or 1 designed for nodelocked based licenses where machines have no physical intrnal connection
+| **RED9_MUTE_UPDATES=1**  : 0 or 1 mute the Red9 Update systems, designed for centralized studio setups. This can also be done within the project setups
 
 For more details please visit our website or contact us: info@red9consultancy.com
 

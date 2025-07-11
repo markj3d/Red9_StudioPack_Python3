@@ -171,13 +171,15 @@ class DataMap(object):
         self.skeletonDict = {}
         self.hikDict = {}
         self.settings_internal = None  # filterSettings object synced from the internal file block
+        # self.infoDict_simple=False  # This prevent the save code from doing the deep gatherInfo calls for mRigs
         
         self.file_ext = ''  # extension the file will be saved as
         self.filepath = ''  # path to load / save
         self.__filepath = ''
         self.filename = ''  # short name of the pose
         self._read_mute = False  # a back-door to prevent the _readPose() call happening, allowing us to modify cached data safely
-
+        self._infoDict_simple = False  # prevent the save code from doing the deep gatherInfo calls for mRigs (used when we cache to clipboard)
+   
         self.dataformat = 'config'
         self._dataformat_resolved = None
 
@@ -233,6 +235,8 @@ class DataMap(object):
 
     @filepath.setter
     def filepath(self, path):
+        if not path:
+            return
         if path and self.file_ext:
             self.__filepath = '%s%s' % (os.path.splitext(path)[0], self.file_ext)
         else:
@@ -489,8 +493,9 @@ class DataMap(object):
         self.infoDict['upAxis'] = cmds.upAxis(q=True, axis=True)
         self.infoDict['metaPose'] = self.metaPose
         self.infoDict['filepath'] = cmds.file(q=True, sn=True)
+        self.infoDict['mayaVersion'] = r9Setup.mayaVersion(minor=True)  # added for ILM 06/03/24
 
-        if self.metaRig:
+        if self.metaRig and not self._infoDict_simple:
             self.infoDict['metaRigNode'] = self.metaRig.mNode
             self.infoDict['metaRigNodeID'] = self.metaRig.mNodeID
             if self.metaRig.hasAttr('version'):
@@ -923,6 +928,7 @@ class DataMap(object):
         # metaData match will fail as it's based on mNodeID and mAttr matches for all nodes.
         # if this happens then regress the testing back to stripPrefix for all UNMATCHED nodes
         if self.matchMethod == 'metaData' and unmatched:
+            log.info('PoseProcessing : left nodes unmatched: %s' % [r9Core.nodeNameStrip(n) for n in unmatched])
             log.info('Regressing matchMethod from "metaData" to "stripPrefix" for failed matches within the mNode ConnectionMap')
             rematched = self._matchNodesToPoseData(unmatched, matchMethod='stripPrefix')
             if rematched:
@@ -1170,6 +1176,7 @@ class DataMap(object):
                 # nodes now matched, apply the data in the dataMap
                 self._applyData()
         except Exception as err:
+            log.warning(traceback.format_exc())
             log.info('Pose Load Failed! : , %s' % err)
         finally:
             self._post_load()
@@ -1285,16 +1292,17 @@ class PoseData(DataMap):
         skeleton = fn.processFilter()
         parentNode = cmds.listRelatives(rootJnt, p=True, f=True)
 
-        for jnt in skeleton:
+        for i, jnt in enumerate(skeleton):
             key = r9Core.nodeNameStrip(jnt)
             self.skeletonDict[key] = {}
+            self.skeletonDict[key]['ID'] = i
             self.skeletonDict[key]['attrs'] = {}
             self.skeletonDict[key]['attrs_kWorld'] = {}
             if parentNode:
                 self.skeletonDict[key]['longName'] = jnt.replace(parentNode[0], '')
             else:
                 self.skeletonDict[key]['longName'] = jnt
-            for attr in ['translateX', 'translateY', 'translateZ', 'rotateX', 'rotateY', 'rotateZ', 'jointOrientX', 'jointOrientY', 'jointOrientZ']:
+            for attr in ['translateX', 'translateY', 'translateZ', 'rotateX', 'rotateY', 'rotateZ', 'scaleX', 'scaleY', 'scaleZ', 'jointOrientX', 'jointOrientY', 'jointOrientZ', 'segmentScaleCompensate']:
                 try:
                     self.skeletonDict[key]['attrs'][attr] = cmds.getAttr('%s.%s' % (jnt, attr))
                 except:
@@ -1409,7 +1417,7 @@ class PoseData(DataMap):
                         else:
                             current = self.poseCurrentCache[key][attr]
                             blendVal = ((val - current) / 100) * percent
-                            # print 'loading at percent : %s (current=%s , stored=%s' % (percent,current,current+blendVal)
+                            # print ('loading at percent : %s (current=%s , stored=%s' % (percent,current,current+blendVal))
                             cmds.setAttr('%s.%s' % (dest, attr), current + blendVal)
                     except Exception as err:
                         log.debug(err)
@@ -1510,6 +1518,7 @@ class PoseData(DataMap):
         self.relativeRots = relativeRots
         self.relativeTrans = relativeTrans
         self.PosePointCloud = None
+        parentSpaceCache = []
 
         if filepath:
             self.filepath = filepath
@@ -1534,11 +1543,17 @@ class PoseData(DataMap):
                             # we've already filtered the hierarchy, may as well just filter the results for speed
                             self.nodesToLoad = r9Core.prioritizeNodeList(self.nodesToLoad, self.settings.filterPriority, regex=True, prioritysOnly=True)
                             self.nodesToLoad.reverse()
+                    else:
+                        log.debug('Warning :  "SnapPriority" flag is OFF, be careful with the results!')
 
                     # setup the PosePointCloud -------------------------------------------------
                     reference = objs[0]
+                    # note that we DONT pass in the filterSettings as we've already filtered the nodes above.
+                    # Instead we pass the nodesToLoad directly, no meshes passes to prevent visuals being generated
                     self.PosePointCloud = PosePointCloud(self.nodesToLoad)
+                    self.PosePointCloud.isVisible = False  # Turn OFF the visual clutter as we don't need it just in case!
                     self.PosePointCloud.buildOffsetCloud(reference, raw=True)
+
                     pptRoot = r9Meta.MetaClass(self.PosePointCloud.posePointRoot)
                     resetCache = [pptRoot.translate, pptRoot.rotate]
 
@@ -1551,10 +1566,19 @@ class PoseData(DataMap):
                 self._applyData(percent)
 
                 if self.relativePose:
+
+                    # add in the skip process we did for the r9Anim
+                    snapRotates = True
+                    snapTranslates = True
+                    if self.relativeRots == 'skip':
+                        snapRotates = False
+                    if self.relativeTrans == 'skip':
+                        snapTranslates = False
+
                     # snap the poseCloud to the new xform of the referenced node, snap the cloud
                     # to the pose, reset the clouds parent to the cached xform and then snap the
                     # nodes back to the cloud
-                    r9Anim.AnimFunctions.snap([reference, self.PosePointCloud.posePointRoot])
+                    r9Anim.AnimFunctions.snap([reference, self.PosePointCloud.posePointRoot], snapTranslates=snapTranslates, snapRotates=snapRotates)
 
                     if self.relativeRots == 'projected':
                         if self.mayaUpAxis == 'y':
@@ -1786,6 +1810,7 @@ class PosePointCloud(object):
             elif filterSettings.filterIsActive():
                 self.settings = filterSettings
         else:
+            # else : base filter that ISN'T ACTIVE
             self.settings = r9Core.FilterNode_Settings()
 
         if self.getCurrentInstances():
@@ -1825,15 +1850,12 @@ class PosePointCloud(object):
         '''
         if self.settings.filterIsActive():
             __searchPattern_cached = self.settings.searchPattern
-#             if self.prioritySnapOnly:
-#                 self.settings.searchPattern=self.settings.filterPriority
-#            self.inputNodes=r9Core.FilterNode(self.inputNodes, self.settings).processFilter()
 
             flt = r9Core.FilterNode(self.inputNodes, self.settings)
             if self.prioritySnapOnly:
                 # take from the flt instance as that now manages metaRig specific settings internally
                 self.settings.searchPattern = flt.settings.filterPriority
-            
+
             # by-pass for unloaded references linked to mNode systems
             self.inputNodes = [node for node in flt.processFilter() if cmds.nodeType(node) == 'transform']
 
@@ -1841,14 +1863,21 @@ class PosePointCloud(object):
 
         # auto logic for MetaRig - go find the renderMeshes wired to the systems
         if self.settings.metaRig:
-            if not self.meshes:
-                self.mRig = r9Meta.getConnectedMetaSystemRoot(self.inputNodes)
-            else:
+            self.mRig = r9Meta.getConnectedMetaSystemRoot(self.inputNodes)
+            if not self.mRig:
                 self.mRig = r9Meta.getMetaRigs()[0]
-            self.meshes = self.mRig.renderMeshes
+            if not self.meshes:
+                self.meshes = self.mRig.renderMeshes
+
+        # auto logic for MetaRig - go find the renderMeshes wired to the systems
+        # if self.settings.metaRig:
+        #     if not self.meshes:
+        #         self.mRig = r9Meta.getConnectedMetaSystemRoot(self.inputNodes)
+        #     else:
+        #         self.mRig = r9Meta.getMetaRigs()[0]
+        #     self.meshes = self.mRig.renderMeshes
 
             if self.mRig and self.dynamic_scale:
-
                 # try using the PuppetRig controlScale attr first
                 if hasattr(self.mRig, 'masterNode') and cmds.objExists('%s.controlScale' % self.mRig.masterNode[0]):
                     self.scale = cmds.getAttr('%s.controlScale' % self.mRig.masterNode[0]) / 8.964  # 8.964 is the base controlScale of our PuppetRig so used as the base calculation
@@ -2018,7 +2047,8 @@ class PosePointCloud(object):
             longer behaves in the same way
         '''
         currentCount = len(cmds.listRelatives(self.posePointRoot, type='shape'))
-        for i, mesh in enumerate(self.meshes):            
+        for i, mesh in enumerate(self.meshes):
+            print('Mesh Duplicating : ', mesh)
             dupMesh = cmds.duplicate(mesh, rc=True, n='%s%s_frm%i' % (self.refMesh,
                                                                     str(i + currentCount),
                                                                     int(cmds.currentTime(q=True))))[0]

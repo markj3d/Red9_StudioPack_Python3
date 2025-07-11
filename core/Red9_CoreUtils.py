@@ -338,6 +338,61 @@ def validateString(strText, fix=False, illegals=['-', '#', '!', ' ', '@'], mayan
             log.info('%s : reformatted string to valid string : %s' % (base, strText))
     return strText
 
+def filterListByString_ratiobased(input_list, filter_string, matchcase=False, threshold=0.8, return_simple=True, adjustedlen=False):
+    '''
+    Generic way to filter a list of strings by a given string input. Unlike the base filterListByString
+    function, this uses difflib and has a threshold of match certainty, allowing typo's to still be matched.
+    However, unlike the other function this won't handle  long matches or clamps etc. Best currently used
+    for simple string list inputs
+
+    :param iniput_list: list of strings to be filtered
+    :param filter_string: string to use in the filter
+    :param matchcase: whether to match or ignore case sensitivity
+    :param threshold: the certainty ratio in the match that comes back from difflib.SequenceMatcher
+    :param return_simple: if True we return just a list of matches, else we return the matches and their match ratios
+    
+    TODO: look at RapidFuzz as an alternative library for better "Fuzzy" matching if needed based on Levenshtein distance
+    
+    >>> input_list = ['attack','atack','attck','attak','tack','tick']
+    >>> filter_string = 'attck'
+    >>> filterListByString_ratiobased(input_list, filter_string threshold=0.9)
+    >>> # returns : ['attack', 'attck']
+    
+    '''
+    import difflib
+    matches = []
+    highest_ratio = 0
+
+    # if r9General.is_basestring(input_list):
+    #     input_list = [f for f in input_list.rstrip(',').split(',') if f]
+    filter_length = len(filter_string)
+    
+    for item in input_list:
+        # difflib.SequenceMatcher for the ration of match here
+        if matchcase:
+            matcher = difflib.SequenceMatcher(None, filter_string, item)
+        else:
+            matcher = difflib.SequenceMatcher(None, filter_string.lower(), item.lower())
+        ratio = matcher.ratio()
+        
+        # test, should we alter the threshold based on the length of the item against the original filter?
+        adjusted_threshold = threshold
+        if adjustedlen and len(item) > filter_length:
+            adjusted_threshold = threshold * (len(filter_string) / len(item))   
+                    
+        # test the confidence of the match against the thershold
+        if ratio >= adjusted_threshold:
+            matches.append((item, ratio))
+            print('matched : %s > %s' % (item, ratio))
+            if ratio > highest_ratio:
+                best_match = item
+                highest_ratio = ratio
+
+    if return_simple:
+        return [m[0] for m in matches]
+    else:
+        return matches
+
 
 def filterListByString(input_list, filter_string, matchcase=False, os_basename=False):
     '''
@@ -370,9 +425,10 @@ def filterListByString(input_list, filter_string, matchcase=False, os_basename=F
 #         filter_string = filter_string.upper()
 
     filteredList = []
-
-    filterBy = [f for f in filter_string.rstrip(',').split(',') if f]
     pattern = []
+        
+    filterBy = [f for f in filter_string.rstrip(',').split(',') if f]
+
     for n in filterBy:
         if ' ' in n:
             pattern.append('(%s)' % n.replace(' ', ')+.*('))
@@ -386,7 +442,7 @@ def filterListByString(input_list, filter_string, matchcase=False, os_basename=F
 
     log.debug('new search pattern : %s' % filterPattern)
 
-    regexFilter = re.compile('(' + filterPattern + ')')  # convert into a regularExpression
+    # regexFilter = re.compile('(' + filterPattern + ')')  # convert into a regularExpression
 
     for item in input_list:
         if os_basename:
@@ -395,7 +451,8 @@ def filterListByString(input_list, filter_string, matchcase=False, os_basename=F
             data = item
 #         if not matchcase:
 #             data = data.upper()
-        if regexFilter.search(data):
+        # if regexFilter.search(data):
+        if re.search(filterPattern, data):
 #             print(data,item,filterPattern)
             if item not in filteredList:
                 filteredList.append(item)
@@ -465,7 +522,7 @@ def parent(children, parent=None, *args, **kws):
 
     :param children: [] children to parent / check parenting
     :param parent: parent to move the child under
-    :rtype: the newly parented full dag path
+    :rtype: the newly parented full dag path, always a list as we're passing in children also as a list
     '''
     _rpaths = []
     if r9General.is_basestring(children):
@@ -697,10 +754,11 @@ class FilterNode_UI(object):
         if cmds.window(self.win, exists=True):
             cmds.deleteUI(self.win, window=True)
 
+    @r9General.windows_qt_wrap
     def _showUI(self):
         self.close()
 
-        window = cmds.window(self.win, title=LANGUAGE_MAP._SearchNodeUI_.title)  # , widthHeight=(400, 400))
+        window = cmds.window(self.win, title=LANGUAGE_MAP._SearchNodeUI_.title)  #, iconName='red9.xpm')  # , widthHeight=(400, 400))
         cmds.menuBarLayout()
         cmds.menu(l=LANGUAGE_MAP._Generic_.vimeo_menu)
         cmds.menuItem(l=LANGUAGE_MAP._Generic_.vimeo_help,
@@ -743,9 +801,15 @@ class FilterNode_UI(object):
         cmds.checkBox(l=LANGUAGE_MAP._Generic_.parent_constraint, v=False,
                         onc=lambda x: self.cbNodeTypes.append('parentConstraint'),
                         ofc=lambda x: self.cbNodeTypes.remove('parentConstraint'))
+        cmds.checkBox(l=LANGUAGE_MAP._Generic_.aim_constraint, v=False,
+                        onc=lambda x: self.cbNodeTypes.append('aimConstraint'),
+                        ofc=lambda x: self.cbNodeTypes.remove('aimConstraint'))
         cmds.checkBox(l=LANGUAGE_MAP._Generic_.ik_handles, v=False,
                         onc=lambda x: self.cbNodeTypes.append('ikHandle'),
                         ofc=lambda x: self.cbNodeTypes.remove('ikHandle'))
+        cmds.checkBox(l=LANGUAGE_MAP._Generic_.clusters, v=False,
+                        onc=lambda x: self.cbNodeTypes.append('cluster'),
+                        ofc=lambda x: self.cbNodeTypes.remove('cluster'))
         cmds.checkBox(l=LANGUAGE_MAP._Generic_.transforms, v=False,
                         onc=lambda x: self.cbNodeTypes.append('transform'),
                         ofc=lambda x: self.cbNodeTypes.remove('transform'))
@@ -1191,6 +1255,15 @@ class FilterNode(object):
         '''
         return self.lsSearchNodeTypes('mesh')
 
+    def lsMeshes_transforms(self):
+        '''
+        Filter for Meshes : from a start node find all mesh nodes in the hierarchy
+        but return the mesh parent transforms rather than the shape nodes
+        '''
+        meshes = self.lsSearchNodeTypes('mesh')
+        data = [cmds.listRelatives(m, p=True, f=True)[0] for m in meshes]
+        return list(set(data))
+    
     def lsTransforms(self):
         '''
         Filter for Transforms : from a start node find all transform nodes in the hierarchy
@@ -1302,7 +1375,7 @@ class FilterNode(object):
                 if cmds.nodeType(cmds.listConnections(animCurve)) == 'clipLibrary':
                     safeCurves.remove(animCurve)
                     continue
-                # ignore curve if FUCKING animlayer it's a member of is locked!
+                # ignore curve if animlayer it's a member of is locked!
                 if cmds.getAttr("%s.ktv" % animCurve, l=True):
                     safeCurves.remove(animCurve)
                     continue
@@ -2147,6 +2220,7 @@ class LockChannels(object):
             if cmds.window(self.win, exists=True):
                 cmds.deleteUI(self.win, window=True)
 
+        @r9General.windows_qt_wrap
         def _showUI(self):
             self.close()
             window = cmds.window(self.win, title=LANGUAGE_MAP._LockChannelsUI_.title, s=True)  # widthHeight=(260, 410))
@@ -2453,7 +2527,7 @@ class LockChannels(object):
                         if not attr in ['rotate', 'translate', 'scale']:
                             cmds.setAttr('%s.%s' % (node, attr), keyable=False, lock=True, channelBox=False)
                     except:
-                        log.info('%s : failed to set initial state' % attr)
+                        log.debug('%s.%s : failed to set initial state' % (node, attr))
 
                 # NOTE: this looks a slow way of processing but an Attr will
                 # only ever appear in one of these lists so not really an overhead
@@ -2520,7 +2594,6 @@ class LockChannels(object):
         elif attrs == 'transforms_complete':
             _attrs = ["tx", "ty", "tz", "rx", "ry", "rz", "sx", "sy", "sz", "rotate", "transform", "scale"]
 
-#         if not hasattr(_attrs, '__iter__'):
         if r9General.is_basestring(_attrs):
             _attrs = set([_attrs])
         if not type(_attrs) == set:
@@ -2671,6 +2744,7 @@ def timeOffset_collapse(scene=False, timerange=None, mRigs=False):
     nodes = None
     if not timerange:
         raise Exception('No timeRange selected to Compress')
+    log.info('Collapsing timerange: %f>>%f' % (timerange[0], timerange[1]))
     offset = -(timerange[1] - timerange[0])
     if not scene:
         nodes = cmds.ls(sl=True, l=True)
@@ -2689,6 +2763,12 @@ def timeOffset_collapseUI():
                                        float(cmds.textField('end', q=True, tx=True))),
                             mRigs=mrigs)
 
+    def __uicb_set(*args):
+        timeRange = r9Anim.timeLineRangeGet(always=True)
+        cmds.textField('start', e=True, tx=timeRange[0])
+        cmds.textField('end', e=True, tx=timeRange[1])
+
+        
     timeRange = r9Anim.timeLineRangeGet(always=True)
 
     win = 'CollapseTime_UI'
@@ -2699,11 +2779,13 @@ def timeOffset_collapseUI():
     cmds.separator(h=10, style='none')
     cmds.text(label=LANGUAGE_MAP._MainMenus_.collapse_time)
     cmds.separator(h=15, style='in')
-    cmds.rowColumnLayout(nc=4, cw=((1, 60), (2, 80), (3, 60), (4, 80)))
+    cmds.rowColumnLayout(nc=5, cw=((1, 50), (2, 60), (3, 50), (4, 60), (5,40)), cs=((1, 10), (3, 10), (5,10)))
     cmds.text(label='Start Frm: ')
     cmds.textField('start', tx=timeRange[0], w=40)
     cmds.text(label='End Frm: ')
     cmds.textField('end', tx=timeRange[1], w=40)
+    cmds.button(label=LANGUAGE_MAP._Generic_.set,
+                command=__uicb_set)
     cmds.setParent('..')
     cmds.separator(h=10, style='none')
     cmds.rowColumnLayout(nc=2, cw=((1, 150), (2, 150)))
@@ -2772,7 +2854,7 @@ class TimeOffset(object):
         if timerange and startfrm:
             offset = offset - timerange[0]
 
-        log.debug('TimeOffset Scene : offset=%s, timelines=%s' %
+        log.info('TimeOffset Scene : offset=%s, timelines=%s' %
                   (offset, str(timelines)))
         cls._processed = {}  # clear the cache
 
@@ -2822,7 +2904,7 @@ class TimeOffset(object):
         if startfrm:
             if timerange:
                 offset = offset - timerange[0]
-                log.info('New Offset calculated based on given Start Frm and timerange : %s' % offset)
+                log.info('New Offset calculated based on given Start Frm and timerange (%s:%s) : OFFSET: %s' % (timerange[0], timerange[1], offset))
             else:
                 log.warning('"startfrm" argument requires the "timeRange" argument to also be passed in, using offset as is was passed in! : %s' % offset)
         if logging_is_debug():
@@ -2832,7 +2914,6 @@ class TimeOffset(object):
         if not nodes:
             basenodes = cmds.ls(sl=True, l=True)
         else:
-#             if not hasattr(nodes, '__iter__'):
             if r9General.is_basestring(nodes):
                 basenodes = [nodes]
             else:
@@ -2879,7 +2960,6 @@ class TimeOffset(object):
             filtered = basenodes
 
         if filtered:
-#             with r9General.undoContext():
             with r9General.AnimationContext(eval_mode='anim', time=False, undo=True):
                 if flocking or randomize:
                     cachedOffset = 0  # Cached last flocking value

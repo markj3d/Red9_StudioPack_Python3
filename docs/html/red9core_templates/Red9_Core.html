@@ -53,27 +53,34 @@
 <li class="toctree-l1"><a class="reference internal" href="../red9pro_templates/Red9_Pro_anim_map.html">Pro_Pack : anim_map</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../red9pro_templates/Red9_Pro_animation.html">Pro_Pack : animation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../red9pro_templates/Red9_Pro_audio.html">Pro_Pack : audio</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../red9pro_templates/Red9_Pro_capture.html">Pro_Pack : capture</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../red9pro_templates/Red9_Pro_deformers.html">Pro_Pack : deformers</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../red9pro_templates/Red9_Pro_export.html">Pro_Pack : exporter</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../red9pro_templates/Red9_Pro_general.html">Pro_Pack : general</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../red9pro_templates/Red9_Pro_importexport.html">Pro_Pack : importexport</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../red9pro_templates/Red9_Pro_metadata_pro.html">Pro_Pack : metadata_pro</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../red9pro_templates/Red9_Pro_optimiser.html">Pro_Pack : optimiser</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../red9pro_templates/Red9_Pro_perforce.html">Pro_Pack : perforce</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../red9pro_templates/Red9_Pro_project.html">Pro_Pack : project</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../red9pro_templates/Red9_Pro_r9data.html">Pro_Pack : r9Data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../red9pro_templates/Red9_Pro_r9file.html">Pro_Pack : r9file</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../red9pro_templates/Red9_Pro_rigutils.html">Pro_Pack : rigutils</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../red9pro_templates/Red9_Pro_skining.html">Pro_Pack : skining</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../red9pro_templates/Red9_Pro_shaders.html">Pro_Pack : shaders</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../red9pro_templates/Red9_Pro_skinning.html">Pro_Pack : skinning</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../red9pro_templates/Red9_Pro_uibase.html">Pro_Pack : uibase</a></li>
 </ul>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../red9pro_templates/tools/Red9_Pro_anim_binder.html">Pro_Pack : tools : anim_binder</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../red9pro_templates/tools/Red9_Pro_anim_tools.html">Pro_Pack : tools : anim_tools</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../red9pro_templates/tools/Red9_Pro_anim_trails.html">Pro_Pack : tools : anim_trails</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../red9pro_templates/tools/Red9_Pro_deformer_tools.html">Pro_Pack : tools : deformer_tools</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../red9pro_templates/tools/Red9_Pro_health_manager.html">Pro_Pack : tools : health_manager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../red9pro_templates/tools/Red9_Pro_metahuman_tools.html">Pro_Pack : tools : metahuman_tools</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../red9pro_templates/tools/Red9_Pro_project_manager.html">Pro_Pack : tools : project_manager</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../red9pro_templates/tools/Red9_Pro_rig_manager.html">Pro_Pack : tools : rig_manager</a></li>
 </ul>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="../red9pro_templates/puppet/Red9_Pro_finger_pose_creator.html">Pro_Pack : puppet : finger_pose_creator</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../red9pro_templates/puppet/Red9_Pro_ikfk_match.html">Pro_Pack : puppet : ikfk_match</a></li>
 </ul>
 
@@ -357,6 +364,37 @@ this is ommitted by default as generally we’re processing filenames</li>
 </tr>
 </tbody>
 </table>
+</dd></dl>
+
+<dl class="function">
+<dt id="Red9.core.Red9_CoreUtils.filterListByString_ratiobased">
+<code class="descname">filterListByString_ratiobased</code><span class="sig-paren">(</span><em>input_list</em>, <em>filter_string</em>, <em>matchcase=False</em>, <em>threshold=0.8</em>, <em>return_simple=True</em>, <em>adjustedlen=False</em><span class="sig-paren">)</span><a class="headerlink" href="#Red9.core.Red9_CoreUtils.filterListByString_ratiobased" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generic way to filter a list of strings by a given string input. Unlike the base filterListByString
+function, this uses difflib and has a threshold of match certainty, allowing typo’s to still be matched.
+However, unlike the other function this won’t handle  long matches or clamps etc. Best currently used
+for simple string list inputs</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>iniput_list</strong> – list of strings to be filtered</li>
+<li><strong>filter_string</strong> – string to use in the filter</li>
+<li><strong>matchcase</strong> – whether to match or ignore case sensitivity</li>
+<li><strong>threshold</strong> – the certainty ratio in the match that comes back from difflib.SequenceMatcher</li>
+<li><strong>return_simple</strong> – if True we return just a list of matches, else we return the matches and their match ratios</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<p>TODO: look at RapidFuzz as an alternative library for better “Fuzzy” matching if needed based on Levenshtein distance</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">input_list</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;attack&#39;</span><span class="p">,</span><span class="s1">&#39;atack&#39;</span><span class="p">,</span><span class="s1">&#39;attck&#39;</span><span class="p">,</span><span class="s1">&#39;attak&#39;</span><span class="p">,</span><span class="s1">&#39;tack&#39;</span><span class="p">,</span><span class="s1">&#39;tick&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">filter_string</span> <span class="o">=</span> <span class="s1">&#39;attck&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">filterListByString_ratiobased</span><span class="p">(</span><span class="n">input_list</span><span class="p">,</span> <span class="n">filter_string</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">0.9</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># returns : [&#39;attack&#39;, &#39;attck&#39;]</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="function">
@@ -716,6 +754,13 @@ clamp that and prevent mesh transforms being returned? Is this even reasonable??
 <dt id="Red9.core.Red9_CoreUtils.FilterNode.lsMeshes">
 <code class="descname">lsMeshes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Red9.core.Red9_CoreUtils.FilterNode.lsMeshes" title="Permalink to this definition">¶</a></dt>
 <dd><p>Filter for Meshes : from a start node find all mesh nodes in the hierarchy</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="Red9.core.Red9_CoreUtils.FilterNode.lsMeshes_transforms">
+<code class="descname">lsMeshes_transforms</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#Red9.core.Red9_CoreUtils.FilterNode.lsMeshes_transforms" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filter for Meshes : from a start node find all mesh nodes in the hierarchy
+but return the mesh parent transforms rather than the shape nodes</p>
 </dd></dl>
 
 <dl class="method">
